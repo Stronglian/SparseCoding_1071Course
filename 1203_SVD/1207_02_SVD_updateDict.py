@@ -60,8 +60,8 @@ class OMP:
     def SetAlpha(self, inputAlpha):
         self.A = inputAlpha.copy()
         return
-    def UpdateDict_useSVD_one(self, indexOfAtom, indexOfData):
-        print(indexOfAtom, "=>", indexOfData)
+    def UpdateDict_useSVD_one(self, indexOfAtom, indexOfData, boolHaoSol = False):
+        print(indexOfAtom, "=>", indexOfData, "="*10)
 #        tmpD = self.D.copy()
 #        tmpD[:, indexOfAtom].fill(0)
 #        print("tmpD",tmpD)
@@ -81,7 +81,15 @@ class OMP:
 #        OwnPrint(self.D[:, indexOfAtom] * self.A[indexOfAtom, indexOfData])
 #        print("E"*5)
 #        OwnPrint(self.X[:, indexOfData] - self.D * self.A[:, indexOfData] + self.D[:, indexOfAtom] * self.A[indexOfAtom, indexOfData])
-        E = self.X[:, indexOfData] - self.D * self.A[:, indexOfData] + self.D[:, indexOfAtom] * self.A[indexOfAtom, indexOfData]
+        if boolHaoSol:
+            # 一樣結果
+            t_C = self.A.copy()
+            t_C[indexOfAtom, indexOfData] = 0
+#            print(t_C)
+            tmp_data = self.D * t_C[:, indexOfData]
+            E = self.X[:, indexOfData] - tmp_data
+        else:
+            E = self.X[:, indexOfData] - self.D * self.A[:, indexOfData] + self.D[:, indexOfAtom] * self.A[indexOfAtom, indexOfData]
         print("E", E)
         #        print("SVD_T")
         #        u, s, v = np.linalg.svd(E.T) # need trans?
@@ -98,23 +106,25 @@ class OMP:
         #        print(np.dot(np.multiply(u,s),v))
         #        print(np.dot(np.dot(u, np.diag(s)),v))
         #        print("="*10, 2)
-        
-#        print("new d"+str(indexOfAtom), u[:, 0].T)
-#        self.D[:, indexOfAtom] = u[:, 0].copy()
+        ### 哪一邊呢?
+        print("->new d"+str(indexOfAtom), u[:, 0].T)
+        self.D[:, indexOfAtom] = u[:, 0].copy()
         print("new d"+str(indexOfAtom), u[0, :])
-        self.D[:, indexOfAtom] = u[0, :].T.copy()
+#        self.D[:, indexOfAtom] = u[0, :].T.copy()
         
         #        print("new coe?", s[0] * v[:, 0])
         #        self.A[indexOfAtom, indexOfData] = (s[0] * v[:, 0]).T
-#        print("new coe", s[0] * v.T[0, :])
-        self.A[indexOfAtom, indexOfData] = (s[0] * vh[0, :])
+#        newCoe = s[0] * vh[0, :]
+        newCoe = s[0] * vh[:, 0].T
+        print("new coe", newCoe)
+        self.A[indexOfAtom, indexOfData] = newCoe
         return
     
     def UpdateDict_FLOW(self):
         usedAtomIndex, userX = np.where(self.A!=0)
 #        print(usedAtomIndex)
         for indexOfAtom in range(self.D.shape[1]):
-            print("\nindexOfAtom:", indexOfAtom, "=> d"+str((indexOfAtom)))
+            print("\nindexOfAtom:", indexOfAtom)#, "=> d"+str((indexOfAtom)))
             tmp = np.where(usedAtomIndex == indexOfAtom)[0]
             if tmp.shape[0] == 0:
                 continue
@@ -123,38 +133,7 @@ class OMP:
             self.UpdateDict_useSVD_one(indexOfAtom, userX[tmp])
 #            break
         return
-    
-#    def UpdateDict_useSVD_one_TMP(self, indexOfAtom, indexOfData):
-#        """ 嘗試用另外一種方式寫"""
-##        print(indexOfAtom, "=>", indexOfData)
-#        E = self.X[:, indexOfData] - self.D * self.A[:, indexOfData] + self.D[:, indexOfAtom] * self.A[indexOfAtom, indexOfData]
-#        u, s, vh = np.linalg.svd(E) # need trans? 看E的變化應該選這個
-##        self.D[:, indexOfAtom] = u[:, 0].copy()
-##        self.A[indexOfAtom, indexOfData] = (s[0] * vh[0, :])
-#        return u[:, 0].copy(), (s[0] * vh[0, :])
-#    
-#    def UpdateDict_FLOW_TMP(self):
-#        """ 嘗試用另外一種方式寫"""
-#        usedAtomIndex, userX = np.where(self.A!=0)
-##        print(usedAtomIndex)
-#        newD = np.matrix(np.zeros_like(self.D))
-#        newA = np.matrix(np.zeros_like(self.A))
-#        for indexOfAtom in range(self.D.shape[1]):
-##            print("indexOfAtom:", indexOfAtom)
-#            tmp = np.where(usedAtomIndex == indexOfAtom)[0]
-#            if tmp.shape[0] == 0:
-#                newD[:, indexOfAtom] = self.D[:, indexOfAtom]
-##                newA[indexOfAtomm, indexOfData] = self.A[indexOfAtom, indexOfData]
-#                continue
-##            print(np.where(usedAtomIndex == indexOfAtom))
-##            print("=>", userX[tmp])
-#            tmpD, tmpA = self.UpdateDict_useSVD_one_TMP(indexOfAtom, userX[tmp])
-#
-#            newD[:, indexOfAtom] = tmpD.copy()
-#            newA[indexOfAtom, userX[tmp]] = tmpA.copy()
-#        self.D = newD
-#        self.A = newA
-#        return
+
 #%%
 #題目
 D_org = np.matrix([[ 0.0000, -0.8837, 0.7837,  0.7355, -0.2433, -0.5711,  0.8960,  0.5046,  0.2006, -0.5627],
@@ -170,7 +149,7 @@ A     = np.matrix([[ 0.    ,  0.    ,  0.    ,  0.    , -1.2111,  0.    ],
                    [ 1.6313,  0.    ,  0.    ,  0.    ,  0.    ,  1.3596],
                    [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],
                    [ 0.    ,  0.    , -0.9391,  0.    ,  0.    ,  0.    ],
-                   [-0.1935,  0.    ,  0.    , -0.8023,  0.    , -0.0046],
+                   [-0.1935,  0.    ,  0.    , -0.8023,  0.    , -0.046],
                    [ 0.    , -0.2488,  0.7716,  0.    ,  0.    ,  0.    ],
                    [ 0.    ,  1.8362,  0.    ,  0.    ,  0.1716,  0.    ]])
 
