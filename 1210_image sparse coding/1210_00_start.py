@@ -26,7 +26,9 @@ class OMP:
         print( "X: There are", self.X.shape[1], "signal with","length", self.X.shape[0])
         
         return
-    
+    def SetDictionary(self, inputDictionary):
+        self.D = inputDictionary.copy()
+        return
     def Cal_OneX_alpha_OMP(self, inputX, L, boolDeubg = False):
         """ 
         算單一 signal (Xi) 的 alpha
@@ -165,12 +167,19 @@ for _i in range(_cols - _cols_patch):
 #%%
 D = initailDict.copy()
 # 
-omp = OMP(D, X_img, 3)
-A = omp.Flow_all_OMP()
+_count_time = 0
+#for _count_time in range(10):
+omp = OMP(D, X_img, 6)
 svd = SVD(D, X_img)
-svd.SetAlpha(A)
-D = svd.UpdateDict_FLOW()
+while _count_time < 6:
+    print("time:", _count_time)
+    omp.SetDictionary(D)
+    A = omp.Flow_all_OMP()
+    svd.SetAlpha(A)
+    D = svd.UpdateDict_FLOW()
+    
+    _count_time += 1
 
-
+#%%
 _endTime = time.time()
 print("\n\nIt cost", round(_endTime - _startTime, 4), "sec.")
