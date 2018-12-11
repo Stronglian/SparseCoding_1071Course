@@ -3,6 +3,7 @@
 Created on Wed Dec 12 00:28:49 2018
 
 @author: StrongPria
+https://stackoverflow.com/questions/7715594/how-to-reset-cursor-to-the-beginning-of-the-same-line-in-python
 """
 import numpy as np
 import cv2
@@ -80,7 +81,7 @@ class OMP_SVD: #兩個 class 合併成 sparse codeing 吧
             alpha = self.Cal_OneX_alpha_OMP(self.X[:, i], L, boolDeubg = boolDeubg)
             alphaALL[:, i] = alpha.copy()
             if i % 5 == 0 and boolProgressShow:
-                print("[", i, "/", self.X.shape[1], "]")
+                print("\r" , "[", i, "/", self.X.shape[1], "]  ", sep = "", end = "", flush=True)
         self.A = alphaALL.copy()
         return self.A
     
@@ -128,7 +129,8 @@ class OMP_SVD: #兩個 class 合併成 sparse codeing 吧
 #            print("=>", userX[tmp])
             self.UpdateDict_useSVD_one(indexOfAtom, userX[tmp])
             if indexOfAtom % 5 == 0 and boolProgressShow:
-                print("[", indexOfAtom, "/", self.D.shape[1], "]")
+                print("\r", "[", indexOfAtom, "/", self.D.shape[1], "]  ", sep = "", end = "", flush=True)
+#                print("\r" * _r_num, "[", indexOfAtom, "/", self.D.shape[1], "]", sep = "", end = "", flush=True)
         return self.D
 #%% 重建 函數狀態
 # y = noiseImg
