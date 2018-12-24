@@ -146,7 +146,7 @@ def Rebuild(y, Rij, A, D, _I, _J, _cols_patch, _rows_patch, mu = 1):
         for _j in range(0, _J, 1):
             tmp[_i:_i+_cols_patch, _j:_j+_rows_patch] += (D * A[:, count_patch]).reshape(_cols_patch, _rows_patch, order="F")
             count_patch += 1
-    x = (y + mu*tmp)  / (I + mu * Rij)
+    x = (y + mu * tmp)  / (I + mu * Rij)
     return x
 #%%
 _startTime = time.time()
@@ -175,7 +175,7 @@ X_img = np.zeros((_cols_patch * _rows_patch, \
 print(X_img.shape)
 #%% 切片執行 與 Rij 計算
 # Rij
-Rij_BIG = np.zeros((_I, _J, _rows_patch*_cols_patch, _rows*_cols), dtype = np.bool) # if not bool, need 56 GB, and memory error
+#Rij_BIG = np.zeros((_I, _J, _rows_patch*_cols_patch, _rows*_cols), dtype = np.bool) # if not bool, need 56 GB, and memory error
 Rij_Progressive = np.zeros((_rows, _cols))
 # 切片
 count = 0 # _i*_I + _j 或這樣算
@@ -189,7 +189,7 @@ for _i in range(_I): # _I = _cols - _cols_patch
         _r = 0
         for _i_tmp in range(_i, _i + _cols_patch):
             for _j_tmp in range(_j, _j + _rows_patch):
-                Rij_BIG[_i, _j, _r, _i_tmp * _cols_patch + _j_tmp] = 1
+#                Rij_BIG[_i, _j, _r, _i_tmp * _cols_patch + _j_tmp] = 1
             
                 Rij_Progressive[_i_tmp, _j_tmp] += 1
                 
